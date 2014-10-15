@@ -34,9 +34,9 @@ function ClientSocketMock(id) {
 	this.id = id;
 	this.client = {}
 }
-util.inherits(ServerSocketMock, EventEmitter);
+util.inherits(ClientSocketMock, EventEmitter);
         
-ClientSocketMock.prototype = function() {
+ClientSocketMock.prototype.disconnect = function() {
 	this.emit('disconnect');
 }
 
@@ -103,7 +103,7 @@ describe('Server socket authentication', function(){
       done();
     }
     
-    require('../../lib/auth/socket')(server, {
+    require('../lib/socketio-auth')(server, {
       timeout:80,
       authenticate: authenticate,
       postAuthenticate: postAuth
