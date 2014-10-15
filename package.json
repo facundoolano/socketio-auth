@@ -7,7 +7,7 @@
     "test": "test"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "node_modules/mocha/bin/mocha"
   },
   "repository": {
     "type": "git",
@@ -25,5 +25,12 @@
   "bugs": {
     "url": "https://github.com/invisiblejs/socketio-auth/issues"
   },
-  "homepage": "https://github.com/invisiblejs/socketio-auth"
+  "homepage": "https://github.com/invisiblejs/socketio-auth",
+  "dependencies": {
+    "underscore": "^1.7.0",
+    "winston": "^0.8.1"
+  },
+  "devDependencies": {
+    "mocha": "^1.21.5"
+  }
 }
