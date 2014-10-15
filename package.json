@@ -1,0 +1,29 @@
+{
+  "name": "socketio-auth",
+  "version": "0.0.0",
+  "description": "Authentication for socket.io",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/invisiblejs/socketio-auth"
+  },
+  "keywords": [
+    "socket",
+    "socket.io",
+    "authentication",
+    "auth",
+    "invisible.js"
+  ],
+  "author": "Facundo Olano and Martín Paulucci",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/invisiblejs/socketio-auth/issues"
+  },
+  "homepage": "https://github.com/invisiblejs/socketio-auth"
+}
