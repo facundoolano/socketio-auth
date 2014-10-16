@@ -1,0 +1,36 @@
+{
+  "name": "socketio-auth",
+  "version": "0.0.1",
+  "description": "Authentication for socket.io",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node_modules/mocha/bin/mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/invisiblejs/socketio-auth"
+  },
+  "keywords": [
+    "socket",
+    "socket.io",
+    "authentication",
+    "auth",
+    "invisible.js"
+  ],
+  "author": "Facundo Olano and Martín Paulucci",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/invisiblejs/socketio-auth/issues"
+  },
+  "homepage": "https://github.com/invisiblejs/socketio-auth",
+  "dependencies": {
+    "underscore": "^1.7.0",
+    "winston": "^0.8.1"
+  },
+  "devDependencies": {
+    "mocha": "^1.21.5"
+  }
+}
