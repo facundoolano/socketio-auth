@@ -28,7 +28,7 @@
   "homepage": "https://github.com/invisiblejs/socketio-auth",
   "dependencies": {
     "underscore": "^1.7.0",
-    "winston": "^0.8.1"
+    "debug": "^2.1.0"
   },
   "devDependencies": {
     "mocha": "^1.21.5"
