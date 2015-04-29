@@ -52,7 +52,7 @@ The client just needs to make sure to authenticate after connecting:
 ```javascript
 var socket = io.connect('http://localhost');
 socket.on('connect', function(){
-  socket.emit('authentication', {client: "John", password: "secret"});
+  socket.emit('authentication', {username: "John", password: "secret"});
 });
 ```
 The server will emit the `authenticated` event to confirm authentication.
