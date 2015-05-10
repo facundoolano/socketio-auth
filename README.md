@@ -2,7 +2,9 @@
 
 This module provides hooks to implement authentication in [socket.io](https://github.com/Automattic/socket.io) without using querystrings to send credentials, which is not a good security practice.
 
-It works by marking the clients as unauthenticated by default and listening to an `authentication` event. If a client provides wrong credentials or doesn't authenticate it gets disconnected. While the server waits for a connected client to authenticate, it won't emit any events to it.
+It works by marking the clients as unauthenticated by default and listening to an `authentication` event. If a client provides wrong credentials or doesn't authenticate it gets disconnected. While the server waits for a connected client to authenticate, it won't emit any broadcast/namespace events to it.
+
+Note that during the window while the server waits for authentication, direct messages emitted to the socket (i.e. `socket.emit(msg)`) *will* be received by the client. To avoid those types of messages reaching unauthorized clients, the emission code should either be defined after the `authenticated` event is triggered by the server or the `socket.auth` should be checked to make sure the socket is authenticated.
 
 ## Usage
 
