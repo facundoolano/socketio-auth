@@ -6,6 +6,8 @@ It works by marking the clients as unauthenticated by default and listening to a
 
 Note that during the window while the server waits for authentication, direct messages emitted to the socket (i.e. `socket.emit(msg)`) *will* be received by the client. To avoid those types of messages reaching unauthorized clients, the emission code should either be defined after the `authenticated` event is triggered by the server or the `socket.auth` flag should be checked to make sure the socket is authenticated.
 
+See [this blog post](https://facundoolano.wordpress.com/2014/10/11/better-authentication-for-socket-io-no-query-strings/) for more details on this authentication method.
+
 ## Usage
 
 To setup authentication for the socket.io connections, just pass the server socket to socketio-auth with a configuration object:
