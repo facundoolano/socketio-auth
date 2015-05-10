@@ -4,6 +4,8 @@ This module provides hooks to implement authentication in [socket.io](https://gi
 
 It works by marking the clients as unauthenticated by default and listening to an `authentication` event. If a client provides wrong credentials or doesn't authenticate it gets disconnected. While the server waits for a connected client to authenticate, it won't emit any events to it.
 
+Any server events should not be emitted immediately in `io.on('connection')` in order to preserve the need for authentication before receiving any events from the server.
+
 ## Usage
 
 To setup authentication for the socket.io connections, just pass the server socket to socketio-auth with a configuration object:
