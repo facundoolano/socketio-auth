@@ -2,7 +2,40 @@
 
 This module provides hooks to implement authentication in [socket.io](https://github.com/Automattic/socket.io) without using querystrings to send credentials, which is not a good security practice.
 
-## Usage
+Client:
+```javascript
+var socket = io.connect('http://localhost');
+socket.on('connect', function(){
+  socket.emit('authentication', {username: "John", password: "secret"});
+  socket.on('authenticated', function() {
+    // use the socket as usual
+  });
+});
+```
+
+Server:
+```javascript
+var io = require('socket.io').listen(app);
+
+require('socketio-auth')(io, {
+  authenticate: function (data, callback) {
+    //get credentials sent by the client
+    var username = data.username;
+    var password = data.password;
+    
+    db.findUser('User', {username:username}, function(err, user) {
+      
+      //inform the callback of auth success/failure
+      if (err || !user) return callback(new Error("User not found"));
+      return callback(null, user.password == password);
+    }
+  }
+});
+```
+
+The client should send an `authentication` event right after connecting, including whatever credentials are needed by the server to identify the user (i.e. user/password, auth token, etc.). The `authenticate` function receives those same credentials and uses them to authenticate.
+
+## Configuration
 
 To setup authentication for the socket.io connections, just pass the server socket to socketio-auth with a configuration object:
 
@@ -44,16 +77,6 @@ function postAuthenticate(socket, data) {
 ```
 
 * `timeout`: The amount of millisenconds to wait for a client to authenticate before disconnecting it. Defaults to 1000.
-
-The client just needs to make sure to authenticate after connecting: 
-
-```javascript
-var socket = io.connect('http://localhost');
-socket.on('connect', function(){
-  socket.emit('authentication', {username: "John", password: "secret"});
-});
-```
-The server will emit the `authenticated` event to confirm authentication.
 
 
 ## Implementation details
