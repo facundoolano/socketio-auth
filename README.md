@@ -2,12 +2,6 @@
 
 This module provides hooks to implement authentication in [socket.io](https://github.com/Automattic/socket.io) without using querystrings to send credentials, which is not a good security practice.
 
-It works by marking the clients as unauthenticated by default and listening to an `authentication` event. If a client provides wrong credentials or doesn't authenticate it gets disconnected. While the server waits for a connected client to authenticate, it won't emit any broadcast/namespace events to it.
-
-Note that during the window while the server waits for authentication, direct messages emitted to the socket (i.e. `socket.emit(msg)`) *will* be received by the client. To avoid those types of messages reaching unauthorized clients, the emission code should either be defined after the `authenticated` event is triggered by the server or the `socket.auth` flag should be checked to make sure the socket is authenticated.
-
-See [this blog post](https://facundoolano.wordpress.com/2014/10/11/better-authentication-for-socket-io-no-query-strings/) for more details on this authentication method.
-
 ## Usage
 
 To setup authentication for the socket.io connections, just pass the server socket to socketio-auth with a configuration object:
@@ -60,3 +54,12 @@ socket.on('connect', function(){
 });
 ```
 The server will emit the `authenticated` event to confirm authentication.
+
+
+## Implementation details
+
+**socketio-auth** implements two-step authentication: upon connection, the server marks the clients as unauthenticated and listens to an `authentication` event. If a client provides wrong credentials or doesn't authenticate after a timeout period it gets disconnected. While the server waits for a connected client to authenticate, it won't emit any broadcast/namespace events to it. By using this approach the sensitive authentication data, such as user credentials or tokens, travel in the body of a secure request, rather than a querystring that can be logged or cached.
+
+Note that during the window while the server waits for authentication, direct messages emitted to the socket (i.e. `socket.emit(msg)`) *will* be received by the client. To avoid those types of messages reaching unauthorized clients, the emission code should either be defined after the `authenticated` event is triggered by the server or the `socket.auth` flag should be checked to make sure the socket is authenticated.
+
+See [this blog post](https://facundoolano.wordpress.com/2014/10/11/better-authentication-for-socket-io-no-query-strings/) for more details on this authentication method.
