@@ -32,6 +32,15 @@ ServerSocketMock.prototype.connect = function(nsp, client) {
   this.nsps[nsp].connect(client);
 };
 
+ServerSocketMock.prototype.emit = function(event, data, cb) {
+  ServerSocketMock.super_.prototype.emit.call(this, event, data);
+
+  //fakes client acknowledgment
+  if (cb) {
+    process.nextTick(cb);
+  }
+};
+
 function ClientSocketMock(id) {
   this.id = id;
   this.client = {};
@@ -135,25 +144,57 @@ describe('Server socket authentication', function() {
     });
   });
 
-  it('Should not authenticate without credentials', function(done) {
+  it('Should send error event on invalid credentials', function(done) {
     server.connect('/User', client);
 
     process.nextTick(function() {
-      client.once('disconnect', function() {
+      client.once('unauthorized', function(err) {
+        assert.equal(err.message, 'Authentication failure');
+        done();
+      });
+      client.emit('authentication', {token: 'invalid'});
+    });
+  });
+
+  it('Should send error event on missing credentials', function(done) {
+    server.connect('/User', client);
+
+    process.nextTick(function() {
+      client.once('unauthorized', function(err) {
+        assert.equal(err.message, 'Missing credentials');
         done();
       });
       client.emit('authentication', {});
     });
   });
 
-  it('Should not authenticate with invalid credentials', function(done) {
+  it('Should disconnect on missing credentials', function(done) {
     server.connect('/User', client);
 
     process.nextTick(function() {
-      client.once('disconnect', function() {
-        done();
+      client.once('unauthorized', function() {
+        //make sure disconnect comes after unauthorized
+        client.once('disconnect', function() {
+          done();
+        });
+      });
+
+      client.emit('authentication', {});
+    });
+  });
+
+  it('Should disconnect on invalid credentials', function(done) {
+    server.connect('/User', client);
+
+    process.nextTick(function() {
+      client.once('unauthorized', function() {
+        //make sure disconnect comes after unauthorized
+        client.once('disconnect', function() {
+          done();
+        });
       });
       client.emit('authentication', {token: 'invalid'});
     });
   });
+
 });
