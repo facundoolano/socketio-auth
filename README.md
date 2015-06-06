@@ -78,6 +78,33 @@ function postAuthenticate(socket, data) {
 
 * `timeout`: The amount of millisenconds to wait for a client to authenticate before disconnecting it. Defaults to 1000.
 
+## Auth error messages
+
+When client authentication fails, the server will emit an `unauthorized` event with the failure reason:
+
+```javascript
+socket.emit('authentication', {username: "John", password: "secret"});
+socket.on('unauthorized', function(err){
+  console.log("There was an error with the authentication:", err.message); 
+});
+```
+
+The value of `err.message` depends on the outcome of the `authenticate` function used in the server: if the callback receives an error its message is used, if the success parameter is false the message is `'Authentication failure'` 
+
+```javascript
+function authenticate(data, callback) {
+  db.findUser('User', {username:data.username}, function(err, user) {
+    if (err || !user) {
+      //err.message will be "User not found"
+      return callback(new Error("User not found"));
+    }
+    //if wrong password err.message will be "Authentication failure"
+    return callback(null, user.password == data.password); 
+  }
+}
+```
+
+After receiving the `unauthorized` event, the client is disconnected.
 
 ## Implementation details
 
