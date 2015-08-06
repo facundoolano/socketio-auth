@@ -18,7 +18,16 @@ Server:
 var io = require('socket.io').listen(app);
 
 require('socketio-auth')(io, {
-  authenticate: function (data, callback) {
+  authenticate: function (socket, data, callback) {
+	//make sure there are headers otherwise it's probably localhost
+	if(typeof socket.request.headers != 'undefined') {
+		//get the client domain
+		user.domain = socket.request.headers.origin.replace('http://', '').replace('https://', '').split(/[/?#]/)[0];
+	}
+	else {
+		user.domain = 'localhost';
+	}
+  
     //get credentials sent by the client
     var username = data.username;
     var password = data.password;
@@ -27,13 +36,13 @@ require('socketio-auth')(io, {
       
       //inform the callback of auth success/failure
       if (err || !user) return callback(new Error("User not found"));
-      return callback(null, user.password == password);
+      return callback(null, (user.password == password && user.domain == domain));
     }
   }
 });
 ```
 
-The client should send an `authentication` event right after connecting, including whatever credentials are needed by the server to identify the user (i.e. user/password, auth token, etc.). The `authenticate` function receives those same credentials and uses them to authenticate.
+The client should send an `authentication` event right after connecting, including whatever credentials are needed by the server to identify the user (i.e. user/password, auth token, etc.). The `authenticate` function receives those same credentials in 'data', and the actual 'socket' in case header information like the origin domain is important, and uses them to authenticate.
 
 ## Configuration
 
@@ -54,13 +63,20 @@ The supported parameters are:
 * `authenticate`: The only required parameter. It's a function that takes the data sent by the client and calls a callback indicating if authentication was successfull:
 
 ```javascript
-function authenticate(data, callback) {
+function authenticate(socket, data, callback) {
+  if(typeof socket.request.headers != 'undefined') {
+	user.domain = socket.request.headers.origin.replace('http://', '').replace('https://', '').split(/[/?#]/)[0];
+  }
+  else {
+	user.domain = 'localhost';
+  }
+  
   var username = data.username;
   var password = data.password;
   
   db.findUser('User', {username:username}, function(err, user) {
     if (err || !user) return callback(new Error("User not found"));
-    return callback(null, user.password == password);
+    return callback(null, (user.password == password && user.domain == domain));
   }
 }
 ```
@@ -92,12 +108,16 @@ socket.on('unauthorized', function(err){
 The value of `err.message` depends on the outcome of the `authenticate` function used in the server: if the callback receives an error its message is used, if the success parameter is false the message is `'Authentication failure'` 
 
 ```javascript
-function authenticate(data, callback) {
+function authenticate(socket, data, callback) {
   db.findUser('User', {username:data.username}, function(err, user) {
     if (err || !user) {
       //err.message will be "User not found"
       return callback(new Error("User not found"));
     }
+	if(socket.request.headers.origin.replace('http://', '').replace('https://', '').split(/[/?#]/)[0] != 'mydomain.com') {
+	  //err.message will be "Origin domain unknown"
+      return callback(new Error("Origin domain unknown"));
+	}
     //if wrong password err.message will be "Authentication failure"
     return callback(null, user.password == data.password); 
   }
