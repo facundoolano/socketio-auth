@@ -19,15 +19,6 @@ var io = require('socket.io').listen(app);
 
 require('socketio-auth')(io, {
   authenticate: function (socket, data, callback) {
-	//make sure there are headers otherwise it's probably localhost
-	if(typeof socket.request.headers != 'undefined') {
-		//get the client domain
-		user.domain = socket.request.headers.origin.replace('http://', '').replace('https://', '').split(/[/?#]/)[0];
-	}
-	else {
-		user.domain = 'localhost';
-	}
-  
     //get credentials sent by the client
     var username = data.username;
     var password = data.password;
@@ -36,7 +27,7 @@ require('socketio-auth')(io, {
       
       //inform the callback of auth success/failure
       if (err || !user) return callback(new Error("User not found"));
-      return callback(null, (user.password == password && user.domain == domain));
+      return callback(null, user.password == password);
     }
   }
 });
@@ -64,19 +55,12 @@ The supported parameters are:
 
 ```javascript
 function authenticate(socket, data, callback) {
-  if(typeof socket.request.headers != 'undefined') {
-	user.domain = socket.request.headers.origin.replace('http://', '').replace('https://', '').split(/[/?#]/)[0];
-  }
-  else {
-	user.domain = 'localhost';
-  }
-  
   var username = data.username;
   var password = data.password;
   
   db.findUser('User', {username:username}, function(err, user) {
     if (err || !user) return callback(new Error("User not found"));
-    return callback(null, (user.password == password && user.domain == domain));
+    return callback(null, user.password == password);
   }
 }
 ```
@@ -114,10 +98,7 @@ function authenticate(socket, data, callback) {
       //err.message will be "User not found"
       return callback(new Error("User not found"));
     }
-	if(socket.request.headers.origin.replace('http://', '').replace('https://', '').split(/[/?#]/)[0] != 'mydomain.com') {
-	  //err.message will be "Origin domain unknown"
-      return callback(new Error("Origin domain unknown"));
-	}
+	
     //if wrong password err.message will be "Authentication failure"
     return callback(null, user.password == data.password); 
   }
