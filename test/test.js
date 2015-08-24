@@ -51,7 +51,7 @@ ClientSocketMock.prototype.disconnect = function() {
   this.emit('disconnect');
 };
 
-function authenticate(data, cb) {
+function authenticate(socket, data, cb) {
   if (!data.token) {
     cb(new Error('Missing credentials'));
   }
