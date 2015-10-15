@@ -76,7 +76,7 @@ function postAuthenticate(socket, data) {
 }
 ```
 
-* `timeout`: The amount of millisenconds to wait for a client to authenticate before disconnecting it. Defaults to 1000.
+* `timeout`: The amount of millisenconds to wait for a client to authenticate before disconnecting it. Defaults to 1000. The value 'none' disables the timeout feature.
 
 ## Auth error messages
 
