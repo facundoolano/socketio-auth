@@ -1,4 +1,4 @@
-# socketio-auth [![Build Status](https://secure.travis-ci.org/invisiblejs/socketio-auth.png)](http://travis-ci.org/invisiblejs/socketio-auth)
+# socketio-auth [![Build Status](https://secure.travis-ci.org/facundoolano/socketio-auth.png)](http://travis-ci.org/facundoolano/socketio-auth)
 
 This module provides hooks to implement authentication in [socket.io](https://github.com/Automattic/socket.io) without using querystrings to send credentials, which is not a good security practice.
 
@@ -76,7 +76,7 @@ function postAuthenticate(socket, data) {
 }
 ```
 
-* `timeout`: The amount of millisenconds to wait for a client to authenticate before disconnecting it. Defaults to 1000.
+* `timeout`: The amount of millisenconds to wait for a client to authenticate before disconnecting it. Defaults to 1000. The value 'none' disables the timeout feature.
 
 ## Auth error messages
 
