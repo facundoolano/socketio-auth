@@ -28,7 +28,7 @@ require('socketio-auth')(io, {
       //inform the callback of auth success/failure
       if (err || !user) return callback(new Error("User not found"));
       return callback(null, user.password == password);
-    }
+    });
   }
 });
 ```
@@ -61,7 +61,7 @@ function authenticate(socket, data, callback) {
   db.findUser('User', {username:username}, function(err, user) {
     if (err || !user) return callback(new Error("User not found"));
     return callback(null, user.password == password);
-  }
+  });
 }
 ```
 * `postAuthenticate`: a function to be called after the client is authenticated. It's useful to keep track of the user associated with a client socket:
@@ -72,7 +72,7 @@ function postAuthenticate(socket, data) {
   
   db.findUser('User', {username:username}, function(err, user) {
     socket.client.user = user;
-  }
+  });
 }
 ```
 
@@ -101,7 +101,7 @@ function authenticate(socket, data, callback) {
 	
     //if wrong password err.message will be "Authentication failure"
     return callback(null, user.password == data.password); 
-  }
+  });
 }
 ```
 
