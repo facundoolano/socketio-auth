@@ -11,7 +11,8 @@
     "jshint": "jshint lib/ test/",
     "lint": "npm run jshint && npm run jscs",
     "pretest": "npm run lint",
-    "test": "mocha"
+    "test": "mocha",
+    "start": "nodemon -w 'package.json' -w 'example/' -e 'coffee' -x 'coffee example/server.coffee'"
   },
   "repository": {
     "type": "git",
@@ -35,8 +36,11 @@
     "lodash": "^3.8.0"
   },
   "devDependencies": {
+    "express": "^4.14.0",
     "jscs": "~1.8.0",
     "jshint": "~2.5.10",
-    "mocha": "^1.21.5"
+    "jstransformer-stylus": "^1.1.0",
+    "mocha": "^1.21.5",
+    "pug": "^2.0.0-beta6"
   }
 }
