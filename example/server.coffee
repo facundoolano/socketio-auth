@@ -31,7 +31,7 @@ html = """
 	.row.middle-xs
 		.col-xs-6
 			each val, key in inputs
-				input(id=key, type='text', placeholder=val)
+				input(id=key, name=key, type='text', placeholder=val)
 				br
 		.col-xs
 			.row.middle-xs.around-xs
@@ -40,6 +40,7 @@ html = """
 		.status
 	p#status-text
 	script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js')
+	script(src='//cdnjs.cloudflare.com/ajax/libs/js-cookie/latest/js.cookie.js')
 	script(src='//cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.js')
 	script(src='//rawgit.com/jashkenas/coffeescript/1.10.0/extras/coffee-script.js')
 	script(src='./clientside.coffee' type='text/coffeescript')
@@ -64,14 +65,9 @@ server = http.createServer app
 
 ctr = 0
 io = require('socket.io') server
-.on 'connection', (socket) ->
-	console.log "Connected Client: #{socket.id} auth:#{socket.auth?}"
-
-	socket.on 'BTN_PRESSED', (data) ->
-		console.log "Button Pressed: #{JSON.stringify(data, null, 2)} auth:#{socket.auth?}"
-		@emit 'response', "hi #{@.client.user}.  we recd:#{data.msg}"
-		# , { ctr: ctr++, user:data.username or 'unknown'}
-	socket.on 'disconnect', ->
+.on 'connection', (sock) ->
+	console.log "Connected Client: #{sock.id} auth:#{sock.auth?}"
+	sock.on 'disconnect', ->
 		console.log 'Disconnected Client: ' + @id
 
 clients = require './accounts'
@@ -80,31 +76,40 @@ findclient = (uname) -> clients.find (x) -> x.username is uname
 
 require('../') io,
 
-	authenticate: (s, d, callback) ->
-
-		console.log "Asking to auth: #{Object.keys d}. auth:#{s.auth?}"
-
-		#get credentials sent by the client
+	timeout: 'none'
+	authenticate: (s,d,cb) ->
+ 		# wget credentials sent by the client3
 		console.log """
 			username: #{uname = d.username}
 			password: #{pword = d.password}
+			authorized: #{s.auth?}
 		"""
 
 		foundclient = findclient uname
 		console.log "found: #{foundclient}"
-
-		if not foundclient?
-			console.log 'couldnt find user'
-			callback new(Error)('User not found')
+		if foundclient?
+			return cb null, pword is foundclient.password
 		else
-			callback null, pword is foundclient.password
+			s.removeListener 'BTN_PRESSED'
+			cb new(Error)(pword is foundclient.password and 'general error' or 'username issue')
 
-	, postAuthenticate: (s, d) ->
-		user = findclient d.username
-		console.log "authenitcated: #{user}"
+
+			# s.disconnect()
+
+
+	postAuthenticate: (s, d) ->
+		if s.auth?
+			s.on 'BTN_PRESSED', (data) ->
+			console.log "Button Pressed: #{JSON.stringify(data, null, 2)} auth:#{s.auth?}"
+			@emit 'response', "hi #{@.client.user}. (#{s.auth?})  we recd:#{data.msg}"
+		else
+			s.removeListener 'BTN_PRESSED'
+			# , { ctr: ctr++, user:data.username or 'unknown'}
+
+		console.log "authenticated: #{user = findclient d.username}"
 		s.client.user = user
 
-	, timeout	: 99999
+
 
 
 # res.sendFile __dirname + '/index.html'
