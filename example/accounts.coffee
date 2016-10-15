@@ -2,8 +2,6 @@
 store = require 'configstore'
 pkg = require __dirname + '/../package.json'
 
-
-
 cfg = new store  pkg.name,
 	admin:
 		name:'Super Admin'
@@ -11,7 +9,6 @@ cfg = new store  pkg.name,
 	user:
 		name:'Regular User'
 		password:''
-
 
 
 console.log "using store name: #{cfg.all}"
