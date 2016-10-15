@@ -12,7 +12,7 @@
     "lint": "npm run jshint && npm run jscs",
     "pretest": "npm run lint",
     "test": "mocha",
-    "start": "DEBUG='*' nodemon -w 'package.json' -w 'example/' -e 'coffee' -x 'coffee example/server.coffee'"
+    "start": "DEBUG='*,-stylus*' nodemon -w 'package.json' -w 'example/' -e 'coffee' -x 'coffee example/server.coffee'"
   },
   "repository": {
     "type": "git",
