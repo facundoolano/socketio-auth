@@ -2,11 +2,15 @@
 
 
 
+
 $ ->
 
 	# socket.emit 'authentication', username: 'John', password: 'secret'
+	url = "http://#{window.location.host}"
+	console.log "url is #{url}"
 
-	socket = io.connect 'http://localhost:3000'
+	socket = io.connect  url
+	window.sock = socket
 	socket.on x, y for x,y of {
 
 		connect: ->
@@ -21,15 +25,16 @@ $ ->
 			enableUI()
 		unauthorized: (err) ->
 			console.log "There was an error with the authentication:", err.message
-			$('.status').removeClass('authenticated')
+			$('.status').removeClass('authenticated authenticating')
 			localStorage.removeItem 'session'
 
 		disconnect: ->
 			report 'I am the client, server is DEAD :('
 			$('.status').removeClass('connected authenticated authenticating connecting')
+			# $('.status').removeClass(x) for x in 'connected|authenticated|authenticating|connecting'.split '|'
 
 		reconnect: ->
-			$(',status').addClass('connecting')
+			$('.status').addClass('connecting')
 			report 'Soy Cliente, me RECONECTE al server. SALVADOO!!!'
 
 		reconnect_attemp: ->
@@ -55,12 +60,12 @@ $ ->
 		$('#button1').addClass 'pure-button-disabled'
 		$('#msg_text').off 'keyup'
 		$('#button1').off 'click'
-	send_msg 	= (data_obj) -> socket.emit 'BTN_PRESSED', data_obj
+
 	report 		= (msg) -> $('#status-text').append msg + '</br>'
 	# "#{msg} keys: #{Object.keys msg}</br>"
 
 	click = (e) ->
-		send_msg
+		socket.emit 'BTN_PRESSED',
 			id: $(@).attr 'id' or 'no id'
 			msg: $('#msg_text').val() or 'null_msg'
 
@@ -79,7 +84,7 @@ $ ->
 			session: localStorage.getItem 'session'
 
 	$('#user, #pass').on 'keyup', (e) -> login() if e.keyCode is 13
-	$('#button2').on 'click', -> login()
+	$('#button2').on 'click', login
 
 	disableUI()
 

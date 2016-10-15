@@ -1,0 +1,46 @@
+link(rel='stylesheet' href='//yui.yahooapis.com/pure/0.6.0/pure-min.css')
+link(rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.css')
+style
+	:stylus
+		body
+			padding 20px
+		.button
+			border 2px black dashed
+		.welcome
+			padding 10px
+			font-size 36pt
+		.status
+			background grey
+			width 100px
+			height 60px
+		.authenticated
+			background green !important
+		.connecting
+			background purple
+		.connected
+			background red
+		.authenticating
+			background orange !important
+		#status-text
+			font-size 20pt
+			background darkgrey
+		input[type=text]
+			width 100%
+
+.row.welcome hello
+.row.middle-xs
+	.col-xs-6
+		each val, key in inputs
+			input(id=key, name=key, type='text', placeholder=val)
+			br
+	.col-xs
+		.row.middle-xs.around-xs
+			each b,i in buttons
+				button.button.pure-button.col-xs-5(id='button' + (i + 1)) !{b}
+	.status
+p#status-text
+script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js')
+script(src='//cdnjs.cloudflare.com/ajax/libs/js-cookie/latest/js.cookie.js')
+script(src='/socket.io/socket.io.js')
+script(src='//rawgit.com/jashkenas/coffeescript/1.10.0/extras/coffee-script.js')
+script(src='./clientside.coffee' type='text/coffeescript')
