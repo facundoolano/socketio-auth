@@ -1,8 +1,3 @@
-
-
-
-
-
 $ ->
 
 	# socket.emit 'authentication', username: 'John', password: 'secret'
@@ -61,7 +56,7 @@ $ ->
 		$('#msg_text').off 'keyup'
 		$('#button1').off 'click'
 
-	report 		= (msg) -> $('#status-text').append msg + '</br>'
+	report = (msg) -> $('#status-text').append "<div>#{msg}</div>"
 	# "#{msg} keys: #{Object.keys msg}</br>"
 
 	click = (e) ->
@@ -70,23 +65,29 @@ $ ->
 			msg: $('#msg_text').val() or 'null_msg'
 
 	login = ->
-		u = $('#user').val()
-		if not u.length
+		console.log socket
+		# look for username in field
+		if not (u = $('#user').val()).length
+			# if blank, search localstorage, or use "admin"
 			u = localStorage.getItem 'username' or 'admin'
+			# reflect value in UI
 			$('#user').val u
-		else
-			localStorage.setItem 'username', u
+		localStorage.setItem 'username', u
 
-		console.log "login! user:#{u}"
+		$('#welcome').text "login! user:#{u}"
 		socket.emit 'authentication',
 			username: u
 			password: $('#pass').val()
 			session: localStorage.getItem 'session'
 
+	# use login button, or enter in our username and password fields to login
 	$('#user, #pass').on 'keyup', (e) -> login() if e.keyCode is 13
 	$('#button2').on 'click', login
 
-	disableUI()
+	$('#button3').on 'click', -> $('#status-text').html ''
+	#
 
-		# if not $('#status').hasClass 'active'
+	disableUI() # disable UI to start with
+
+	# if not $('#status').hasClass 'active'
 	# login('alex','vageen')
