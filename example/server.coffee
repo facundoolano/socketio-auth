@@ -1,5 +1,8 @@
 
-[path,debug,http,pug,express] = (require x for x in ['path','debug','http','pug','express'])
+[clients,path,http,pug,express,util] =
+	require x for x in ['./accounts','path','http','pug','express','util']
+
+debug = require('debug') 'example-app'
 
 app = express()
 .set 'port', process.env.PORT or 3000
@@ -7,7 +10,7 @@ app = express()
 .get '/', (req, res) ->
 	res.send pug.renderFile path.join(__dirname,'client.pug'),
 		pretty: true
-		buttons: ["SEND MSG","LOGIN"]
+		buttons: 'SEND MSG|LOGIN|CLEAR'.split '|'
 		inputs:
 			msg_text: 'Message to send...'
 			user: 'user'
@@ -18,19 +21,18 @@ server = http.createServer app
 
 btnpressed = (data) ->
 	debug "Button Pressed: #{JSON.stringify(data, null, 2)} auth:#{@auth?}"
-	if @auth then @emit 'response', "hi #{@.client.user or 'unknown'} (#{@id}) . (#{@auth?})  we recd:#{data.msg}"
+	debug "sock: #{util.inspect @}"
+	if @auth then @emit 'response', "hi #{@.client.user or 'unknown'} (#{@id}) . (#{@auth?})  we recd:#{data.msg} from #{@.handshake.address}"
 
 ctr = 0
 io = require('socket.io') server
-.on 'connect', (sock) ->
-	debug "Connected Client: #{sock.id} auth:#{sock.auth?}"
+.on 'connection', (sock) ->
+	address = sock.handshake.address
+	debug "Connected Client: #{sock.id} auth:#{sock.auth?} ip:#{address}"
 	sock.on 'disconnect', -> debug 'Disconnected Client: ' + @id
 	sock.on 'BTN_PRESSED', btnpressed
 
-clients = require './accounts'
-
 findclient = (uname) -> clients.find (x) -> x.username is uname
-
 
 require('../') io,
 
@@ -46,6 +48,9 @@ require('../') io,
 			username: #{uname = d.username or ''}
 			password: #{pword = d.password or ''}
 			authorized: #{s.auth?}
+			session: #{d.session}
+			data: #{util.inspect d}
+			socket: #{util.inspect s}
 		"""
 
 		foundclient = findclient uname
@@ -61,7 +66,7 @@ require('../') io,
 			# s.disconnect()
 
 	postAuthenticate: (s, d) ->
-		console.log "iam #{s.auth}"
+		debug "iam #{s.auth}"
 
 		# else
 		# if s.auth?
