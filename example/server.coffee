@@ -1,31 +1,35 @@
 
-[clients,path,http,pug,express,util] =
-	require x for x in ['./accounts','path','http','pug','express','util']
+[clients,path,pug,express,util,moment] =
+	require x for x in ['./accounts','path','pug','express','util','moment']
 
-debug = require('debug') 'example-app'
+debug = require('debug') path.basename(__dirname)
 
 app = express()
-.set 'port', process.env.PORT or 3000
+# .set 'port', process.env.PORT or 3000
 .use express.static __dirname + '/'
 .get '/', (req, res) ->
 	res.send pug.renderFile path.join(__dirname,'client.pug'),
 		pretty: true
-		buttons: 'SEND MSG|LOGIN|CLEAR'.split '|'
-		inputs:
+		buttons: 'message|login|clear|logout'.split '|'
+		inputs: {
 			msg_text: 'Message to send...'
-			user: 'user'
-			pass: 'pass'
+			'user', 'pass' }
 
-server = http.createServer app
-.listen app.get('port'), -> debug "Listening on port #{app.get 'port'}"
+server = require('http').createServer app
+# .listen app.get('port'), -> debug "Listening on port #{app.get 'port'}"
 
 btnpressed = (data) ->
-	debug "Button Pressed: #{JSON.stringify(data, null, 2)} auth:#{@auth?}"
-	debug "sock: #{util.inspect @}"
-	if @auth then @emit 'response', "hi #{@.client.user or 'unknown'} (#{@id}) . (#{@auth?})  we recd:#{data.msg} from #{@.handshake.address}"
+	msg = JSON.stringify data, null, 2
+	debug """
+		Button Pressed:#{msg} } auth:#{@auth?}
+		sock: #{util.inspect @}
+	"""
+	if @auth
+		@emit 'response', "hi #{@.client.user or 'unknown'} (#{@id}) . (#{@auth?})  we recd:#{msg} from #{@.handshake.address}"
 
-ctr = 0
-io = require('socket.io') server
+
+io = require('socket.io')
+.listen server
 .on 'connection', (sock) ->
 	address = sock.handshake.address
 	debug "Connected Client: #{sock.id} auth:#{sock.auth?} ip:#{address}"
@@ -39,34 +43,39 @@ require('../') io,
 	timeout: 'none'
 	authenticate: (s,d,cb) ->
 
-		# 	debug "skipping. already authed"
-		# 	return cb null, s.auth
-
-		# console.log "fuck #{require('util').inspect s}"
-		# wget credentials sent by the client3
 		debug """
-			username: #{uname = d.username or ''}
-			password: #{pword = d.password or ''}
+			username: #{d.username}
+			password: #{d.password}
 			authorized: #{s.auth?}
-			session: #{d.session}
-			data: #{util.inspect d}
-			socket: #{util.inspect s}
+			ip: #{ip = s.handshake.address}
 		"""
-
-		foundclient = findclient uname
-		debug "found: #{foundclient}"
+			# socket: #{util.inspect s}
+		foundclient = findclient d.username
 		if foundclient?
-			okp = pword is foundclient.password
-			s.client.user = foundclient
-			return if okp and s.auth
-			return cb null, okp
+			debug "found user: #{foundclient}"
+			# s.client.user = foundclient
+			ok = d.password? and d.password is foundclient.password
+			if !ok
+				debug "using IP based auth"
+				if foundclient.expires? and foundclient.ip?
+					expiration = moment foundclient.expires, moment.ISO_8601
+					if not (isAfter = expiration.isAfter moment())
+						return cb(new Error('expiration has already occured'))
+					if not (ipMatches =	ip is foundclient.ip)
+						return cb(new Error('IP no matchy-matchy'))
+					ok = isAfter and ipMatches
+
+			return cb null, ok
 
 		cb new(Error)(pword is foundclient.password and 'general error' or 'username issue')
 
-			# s.disconnect()
-
 	postAuthenticate: (s, d) ->
 		debug "iam #{s.auth}"
+		s.client.user = findclient d.username
+		s.client.user.authorize s.handshake.address
+		s.emit 'countdown', s.client.user
+
+server.listen (port = process.env.PORT or 3000), -> debug "Listening on port #{port}"
 
 		# else
 		# if s.auth?
@@ -84,3 +93,9 @@ require('../') io,
 
 # //- link(rel='stylesheet' href='//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.css')
 # //- link(rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/bootstrap-material-design/4.0.2/bootstrap-material-design.css')
+
+		# 	debug "skipping. already authed"
+		# 	return cb null, s.auth
+
+		# console.log "fuck #{require('util').inspect s}"
+		# wget credentials sent by the client3

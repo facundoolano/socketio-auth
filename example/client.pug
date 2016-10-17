@@ -1,74 +1,107 @@
-//- general stylizing
-link(rel='stylesheet' href='//yui.yahooapis.com/pure/0.6.0/pure-min.css')
-//- easy layout helper
-link(rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.css')
-//- styles via stylus
+mixin stylesheets(...z)
+	each sheet in z
+		link(rel='stylesheet' href=sheet)
+mixin scripts(...z)
+	each script in z
+		script(src=script)
+
++stylesheets('//cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure.css'
+	, '//cdnjs.cloudflare.com/ajax/libs/flexboxgrid/6.3.1/flexboxgrid.css')
 style
 	:stylus
-		.connection
-			color white
-			font-weight 900
-			text-transform uppercase
-		body
-			padding 20px
-		.button
-			border 2px black dashed
-		#welcome
-			padding 10px
-			font-size 36pt
-		.status
-			@extends .button
-			background lightgrey
-			width 100px
-			height 60px
+		center()
 			display flex
 			justify-content center
 			flex-direction column
 			text-align center
-		.authenticated
-			background green !important
-			&:after
-				@extends .connection
-				content 'authenticated' !important
-		.connecting
-			background purple
-			&:after
-				@extends .connection
-				content 'connecting'
-		.connected
-			background red
-			&:after
-				@extends .connection
-				content 'connected'
-		.authenticating
-			background orange !important
-			&:after
-				@extends .connection
-				content 'authenticating' !important
-		#status-text
-			font-size 17pt
+		body
+			font-family monospace
+			padding 20px
+		.dashed
+			border 2px black dashed
+		#welcome, #countdown
+
+			font-size 23pt
+		#status
+			center()
+			background lightgrey
+			height 80%
+			div
+				color white
+				font-weight 900
+				text-transform uppercase
+		#log
+			font-size 1.4em
 			background dimgrey
 			color white
 			div
 				padding 10px
 				border-bottom 3px dashed white
-		input[type=text]
-			width 100%
+		input[type=text], button
+			padding 5px
+			margin 5px
+		#ui
+			height 10em
+			min-height 6em
 
-.row#welcome hello
-.row.middle-xs
-	.col-xs-3
+		#countdown
+			padding 10px
+			margin 10px
+			text-align middle
+			color white
+			background rgba(0,0,0,.8)
+			//- height 1.4em
+		#text
+			font-size @font-size -10
+
+#welcome.row
+#ui.row.middle-xs
+	#inputs.pure-form.pure-form-stacked.distributed.col-xs-3
 		each val, key in inputs
-			input(id=key, name=key, type='text', placeholder=val)
-			br
-	.col-xs
-		.row.middle-xs.around-xs
+			input(style='' id=key name=key type='text' placeholder=val)
+	.distributed.col-xs
+		.row.around-xs
 			each b,i in buttons
-				button.button.pure-button.col-xs-3(id='button' + (i + 1)) !{b}
-	.status.col-xs-3
-p#status-text
-script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js')
-//- script(src='//cdnjs.cloudflare.com/ajax/libs/js-cookie/latest/js.cookie.js')
-script(src='/socket.io/socket.io.js')
-script(src='//rawgit.com/jashkenas/coffeescript/1.10.0/extras/coffee-script.js')
-script(src='./clientside.coffee' type='text/coffeescript')
+				button.dashed.pure-button.col-xs-5(id=b, class='button' + (i+1)) !{b}
+	#status.dashed.col-xs-3
+		#text
+.row.center-xs
+	#countdown.col-xs-8(style='display:none;')
+#log
+
+//- coffeescript compiler
+//- session expiration countdown timer
+//- time manipulation for countdown
++scripts('//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.js'
+	,	'/socket.io/socket.io.js'
+	, '//rawgit.com/jashkenas/coffeescript/1.10.0/extras/coffee-script.js')
+
++scripts('//cdnjs.cloudflare.com/ajax/libs/jquery.countdown/2.2.0/jquery.countdown.js'
+	, '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.1/moment.min.js')
+	//- , '//code.getmdl.io/1.2.1/material.min.js')
+
+//- this example's client-side script
+script(src='./client.coffee' type='text/coffeescript')
+
+		//- .authenticated
+		//- 	background green !important
+		//- 	&:after
+		//- 		content 'authenticated' !important
+		//- .connecting
+		//- 	background purple
+		//- 	&:after
+		//- 		content 'connecting'
+		//- .connected
+		//- 	background red
+		//- 	&:after
+		//- 		content 'connected'
+		//- .authenticating
+		//- 	background orange !important
+		//- 	&:after
+		//- 		content 'authenticating' !important
+
+//- bootstrap-esque base stylesheet
+
+//- makes grid layouts easier
+//- +stylesheets('//fonts.googleapis.com/icon?family=Material+Icons'
+	, '//code.getmdl.io/1.2.1/material.indigo-pink.min.css'
