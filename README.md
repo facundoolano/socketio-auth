@@ -22,9 +22,9 @@ require('socketio-auth')(io, {
     //get credentials sent by the client
     var username = data.username;
     var password = data.password;
-    
+
     db.findUser('User', {username:username}, function(err, user) {
-      
+
       //inform the callback of auth success/failure
       if (err || !user) return callback(new Error("User not found"));
       return callback(null, user.password == password);
@@ -43,8 +43,9 @@ To setup authentication for the socket.io connections, just pass the server sock
 var io = require('socket.io').listen(app);
 
 require('socketio-auth')(io, {
-  authenticate: authenticate, 
+  authenticate: authenticate,
   postAuthenticate: postAuthenticate,
+  disconnect: disconnect,
   timeout: 1000
 });
 ```
@@ -57,7 +58,7 @@ The supported parameters are:
 function authenticate(socket, data, callback) {
   var username = data.username;
   var password = data.password;
-  
+
   db.findUser('User', {username:username}, function(err, user) {
     if (err || !user) return callback(new Error("User not found"));
     return callback(null, user.password == password);
@@ -69,10 +70,17 @@ function authenticate(socket, data, callback) {
 ```javascript
 function postAuthenticate(socket, data) {
   var username = data.username;
-  
+
   db.findUser('User', {username:username}, function(err, user) {
     socket.client.user = user;
   });
+}
+```
+* `disconnect`: a function to be called after the client is disconnected.
+
+```javascript
+function disconnect(socket) {
+  console.log(socket.id + ' disconnected');
 }
 ```
 
@@ -85,11 +93,11 @@ When client authentication fails, the server will emit an `unauthorized` event w
 ```javascript
 socket.emit('authentication', {username: "John", password: "secret"});
 socket.on('unauthorized', function(err){
-  console.log("There was an error with the authentication:", err.message); 
+  console.log("There was an error with the authentication:", err.message);
 });
 ```
 
-The value of `err.message` depends on the outcome of the `authenticate` function used in the server: if the callback receives an error its message is used, if the success parameter is false the message is `'Authentication failure'` 
+The value of `err.message` depends on the outcome of the `authenticate` function used in the server: if the callback receives an error its message is used, if the success parameter is false the message is `'Authentication failure'`
 
 ```javascript
 function authenticate(socket, data, callback) {
@@ -98,9 +106,9 @@ function authenticate(socket, data, callback) {
       //err.message will be "User not found"
       return callback(new Error("User not found"));
     }
-	
+
     //if wrong password err.message will be "Authentication failure"
-    return callback(null, user.password == data.password); 
+    return callback(null, user.password == data.password);
   });
 }
 ```

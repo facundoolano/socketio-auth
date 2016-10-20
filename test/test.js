@@ -198,3 +198,31 @@ describe('Server socket authentication', function() {
   });
 
 });
+
+describe('Server socket disconnect', function() {
+  var server;
+  var client;
+
+  it('Should call discon function', function(done) {
+    server = new ServerSocketMock();
+    client = new ClientSocketMock(5);
+
+    var discon = function(socket) {
+      assert.equal(socket, client);
+      done();
+    };
+
+    require('../lib/socketio-auth')(server, {
+      timeout:80,
+      authenticate: authenticate,
+      disconnect: discon
+    });
+
+    server.connect('/User', client);
+
+    process.nextTick(function() {
+      client.disconnect();
+    });
+  });
+
+});
