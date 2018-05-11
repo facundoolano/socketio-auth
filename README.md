@@ -7,10 +7,14 @@ Client:
 var socket = io.connect('http://localhost');
 socket.on('connect', function(){
   socket.emit('authentication', {username: "John", password: "secret"});
-  socket.on('authenticated', function() {
-    // use the socket as usual
-  });
 });
+
+//Use the socket as normal
+//Will only receive messages if authenticated
+socket.on('message', function(msg){
+  console.log(msg);
+});
+
 ```
 
 Server:
