@@ -11,7 +11,8 @@
     "jshint": "jshint lib/ test/",
     "lint": "npm run jshint && npm run jscs",
     "pretest": "npm run lint",
-    "test": "mocha"
+    "test": "mocha",
+    "start": "DEBUG='-stylus*,-engine:*,-socket.io:*,*' nodemon -w 'package.json' -w 'example/' -e 'coffee' -x 'coffee example/server.coffee'"
   },
   "repository": {
     "type": "git",
@@ -35,8 +36,13 @@
     "lodash": "^4.17.5"
   },
   "devDependencies": {
+    "configstore": "^2.1.0",
+    "express": "^4.14.0",
     "jscs": "~1.8.0",
     "jshint": "~2.5.10",
-    "mocha": "^1.21.5"
+    "jstransformer-stylus": "^1.1.0",
+    "mocha": "^1.21.5",
+    "moment": "^2.15.1",
+    "pug": "^2.0.0-beta6"
   }
 }
