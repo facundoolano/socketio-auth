@@ -2,6 +2,8 @@
 
 This module provides hooks to implement authentication in [socket.io](https://github.com/Automattic/socket.io) without using querystrings to send credentials, which is not a good security practice.
 
+**NOTE: I'm not maintaining this project anymore. I don't use socket.io so I can't tell if it's still useful.**
+
 Client:
 ```javascript
 var socket = io.connect('http://localhost');
